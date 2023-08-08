@@ -1,0 +1,9 @@
+Package: bmm
+Version: 1.0-1
+Section: utils
+Priority: optional
+Architecture: all
+Maintainer: Javier Izquierdo <javizqh@gmail.com>
+Homepage: https://github.com/javizqh/BasicMusicManager
+Description: Basic music manager 
+ Do basic maintenance in your music easily

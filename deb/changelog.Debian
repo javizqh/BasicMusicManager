@@ -1,0 +1,13 @@
+bmm (1.0-2) stable; urgency=low
+
+  [ Javier ]
+  * Changes to installer 
+
+ -- Javier <javizqh@gmail.com>  Tue,  8 Aug 2023 20:40:00 +0100 
+
+bmm (1.0-1) stable; urgency=low
+
+  [ Javier ]
+  * basic program to manage your music
+
+ -- Javier <javizqh@gmail.com>  Tue,  8 Aug 2023 20:30:00 +0100 

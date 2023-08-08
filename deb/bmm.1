@@ -1,0 +1,34 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" (C) Copyright 2023 Javier <javizqh@gmail.com>
+.\"
+.TH BMM 1 
+.SH NAME
+bmm \- Basic Music Manager
+.SH SYNOPSIS
+.B bmm [OPTION] ...
+.SH DESCRIPTION
+Manages the .mp3 files in the music directory from the terminal.
+.B bmm  Opens the cli
+.B -h, --help		Show help options
+.B --rename
+Fast option to rename each of the files
+.B -n, --new "ArtistName"
+Create new artist and albums directory
+.B -a, --artist "ArtistName" ["AlbumName"]
+Change artist tag of an artist directory or album directory
+.B -b, --album "ArtistName" "AlbumName"
+Change album tag of an album directory
+.B -d, --download Url "ArtistName" "AlbumName" "SongName"
+Download a song from youtube
+.B -m, --mobile Ip 
+Share songs with the selected device. NOT WORKING
+.SH SEE ALSO
+.BR eyeD3 (1).
+.BR yt-dlp (1).
+.SH AUTHORS
+The
+.B bmm
+script was written by 
+Javier <javizqh@gmail.com>
+.PP
+This document was written by Javier <javizqh@gmail.com> for Debian.
