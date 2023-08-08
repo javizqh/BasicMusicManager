@@ -1,0 +1,23 @@
+Usage: ./bmm.sh [OPTION] ...
+
+Changes the artist and album tags to match the directory they are in
+
+Help options:
+ -h, --help		Show help options
+
+Script options:
+  With no options open command line gui
+ -n, --new		Create new artist and albums directory
+ --rename		Fast option to rename each of the files
+ -a, --artist		Change artist tag of an artist directory or album directory
+ -b, --album		Change album tag of an album directory
+ -d, --download		Download a song from youtube
+ -m, --mobile		Share songs with the selected device
+
+Options usage:
+ -n, --new              ./bmm.sh -n/--new "ArtistName"
+ --rename		./bmm.sh  --rename
+ -a, --artist           ./bmm.sh -a/--artist "ArtistName" ["AlbumName"]
+ -b, --album            ./bmm.sh -b/--album "ArtistName" "AlbumName "
+ -d, --download         ./bmm.sh -d/--download Url "ArtistName" "AlbumName" "SongName"
+ -m, --mobile           ./bmm.sh -m/--mobile Ip 

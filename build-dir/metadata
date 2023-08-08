@@ -1,0 +1,5 @@
+[Application]
+name=com.github.BasicMusicManager
+runtime=org.freedesktop.Platform/x86_64/22.08
+sdk=org.freedesktop.Sdk/x86_64/22.08
+command=bmm.sh

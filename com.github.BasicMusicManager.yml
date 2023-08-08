@@ -1,0 +1,13 @@
+app-id: com.github.BasicMusicManager
+runtime: org.freedesktop.Platform
+runtime-version: '22.08'
+sdk: org.freedesktop.Sdk
+command: bmm.sh
+modules:
+  - name: bmm
+    buildsystem: simple
+    build-commands:
+      - install -D bmm.sh /app/bin/bmm.sh
+    sources:
+      - type: file
+        path: bmm.sh

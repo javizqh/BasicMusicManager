@@ -1,0 +1,24 @@
+{
+  "id" : "com.github.BasicMusicManager",
+  "runtime" : "org.freedesktop.Platform",
+  "runtime-version" : "22.08",
+  "runtime-commit" : "5c8d805b97240ba857b1a63e64fb27fdcf23bb3c2926a5cf6c0d25de23c277fb",
+  "sdk" : "org.freedesktop.Sdk",
+  "sdk-commit" : "7fc5237fd8c82a24f1b7e09f8460a06e9e94f58815628b0439c16a1b618f3d29",
+  "command" : "bmm.sh",
+  "modules" : [
+    {
+      "name" : "bmm",
+      "buildsystem" : "simple",
+      "sources" : [
+        {
+          "path" : "bmm.sh",
+          "type" : "file"
+        }
+      ],
+      "build-commands" : [
+        "install -D bmm.sh /app/bin/bmm.sh"
+      ]
+    }
+  ]
+}
