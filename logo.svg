@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" version="1.1"
+     xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <linearGradient id="Gradient" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" style="stop-color:#FFA348;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFA348;stop-opacity:1" />
+    </linearGradient>
+    <filter id="alpha-to-white">
+      <feColorMatrix in="SourceGraphic" type="matrix"
+                     values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.8 0"/>
+    </filter>
+    <g id="child-svg"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height="16px" width="16px"><title>album music</title><g id="album_music" data-name="album music"><path d="M22.76,7.34C22.32,6.85,23.8,7,2,7A1,1,0,0,0,1,8.14l2,14A1,1,0,0,0,4,23H20a1,1,0,0,0,1-.86C23.15,7,23.18,7.84,22.76,7.34ZM19.13,21H4.87L3.15,9h17.7Z" /><path d="M12,20c3.31,0,6-2.24,6-5s-2.69-5-6-5-6,2.24-6,5S8.69,20,12,20Zm0-8c2.21,0,4,1.35,4,3s-1.79,3-4,3-4-1.35-4-3S9.79,12,12,12Z" /><path d="M12,16a1,1,0,0,0,0-2A1,1,0,0,0,12,16Z" /><path d="M3,6H21a1,1,0,0,0,0-2H3A1,1,0,0,0,3,6Z" /><path d="M5,3H19a1,1,0,0,0,0-2H5A1,1,0,0,0,5,3Z" /></g></svg></g>
+  </defs>
+  <rect
+      width="256"
+      height="256"
+      fill="url(#Gradient)"
+      ry="0"
+      x="0"
+      y="0" />
+  <use xlink:href="#child-svg" filter="url(#alpha-to-white)"
+       transform="matrix(8,0,0,8,64,64)" />
+</svg>

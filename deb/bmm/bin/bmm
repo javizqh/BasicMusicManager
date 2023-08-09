@@ -11,26 +11,34 @@ function update() {
 	#Check and change all the songs in order to match their corresponding artist and album
 	#they are in
 	#TODO: optimize this. Now iterating 3 times per song. Don't now how this is faster than 1 iteration
-	artists=$(ls $music_directory | tr " " "=")
+	artists=$(ls $music_directory | tr " " "╬")
 	for artist in $artists; do
-		nameArtist=$(echo $artist | tr "=" " ")
+		nameArtist=$(echo $artist | tr "╬" " ")
 	  echo "Updating artist $nameArtist:"
 		changeArtist "$nameArtist"
-		albums=$(ls $music_directory/"$nameArtist" | tr " " "=")
+		albums=$(ls $music_directory/"$nameArtist" | tr " " "╬")
 		for album in $albums; do
-			nameAlbum=$(echo $album | tr "=" " ")
+			nameAlbum=$(echo $album | tr "╬" " ")
 			echo -e "\tAlbum $nameAlbum:"
 			changeAlbum "$nameArtist" "$nameAlbum"
       # Change the cover
-      eyeD3 --add-image "$music_directory/$nameArtist/$nameAlbum/.cover":FRONT_COVER "$music_directory/$nameArtist/$nameAlbum/"*.mp3 2&>1 >/dev/null
+      eyeD3 --add-image "$music_directory/$nameArtist/$nameAlbum/.cover":FRONT_COVER "$music_directory/$nameArtist/$nameAlbum/"*.mp3 2>/dev/null >/dev/null
+      # Change spaces for %20
+      coverLocation=$(echo "file://$music_directory/$nameArtist/$nameAlbum/.cover" | sed -e 's/ /%20/g')
+      if [[ -f "$music_directory/$nameArtist/$nameAlbum/.cover" ]]; then
+        gio set "$music_directory/$nameArtist/$nameAlbum" metadata::custom-icon "$coverLocation" 2>/dev/null
+      fi
 			cwd=$(pwd)
 			cd "$music_directory"/"$nameArtist"/"$nameAlbum"
-			songs=$(ls *.mp3 2>/dev/null | sed -E 's/.mp3//' | tr " " "=")
+			songs=$(ls *.mp3 2>/dev/null | sed -E 's/.mp3//' | tr " " "╬")
 			cd "$cwd"
 			for song in $songs; do
-  			nameSong=$(echo $song | tr "=" " ")
+  			nameSong=$(echo $song | tr "╬" " ")
 			  echo -e "\t\tSong $nameSong"
 			  changeTitle "$nameArtist" "$nameAlbum" "$nameSong"
+        if [[ -f "$music_directory/$nameArtist/$nameAlbum/.cover" ]]; then
+          gio set "$music_directory/$nameArtist/$nameAlbum/$nameSong.mp3" metadata::custom-icon "$coverLocation" 2>/dev/null
+        fi
 			done
 		done
 	done
@@ -44,9 +52,9 @@ exitRename=0  # 0 = Not exit / 1 = Exit
 function renameAll() {
 	# Allow the user to fast rename songs
   exitRename=0
-	artists=$(ls $music_directory | tr " " "=")
+	artists=$(ls $music_directory | tr " " "╬")
 	for artist in $artists; do
-		nameArtist=$(echo $artist | tr "=" " ")
+		nameArtist=$(echo $artist | tr "╬" " ")
 		renameArtist "$nameArtist"
     if [ $exitRename = 1 ]; then
       break
@@ -58,9 +66,9 @@ function renameArtist() {
   # $1 = artist
 	# Allow the user to fast rename songs
   exitRename=0
-  albums=$(ls $music_directory/"$1" | tr " " "=")
+  albums=$(ls $music_directory/"$1" | tr " " "╬")
   for album in $albums; do
-    nameAlbum=$(echo $album | tr "=" " ")
+    nameAlbum=$(echo $album | tr "╬" " ")
     renameAlbum "$1" "$nameAlbum"
     if [ $exitRename = 1 ]; then
       break
@@ -73,9 +81,9 @@ function renameAlbum() {
   # $2 = album
 	# Allow the user to fast rename songs
   exitRename=0
-  songs=$(ls $music_directory/"$1"/"$2" | tr " " "=")
+  songs=$(ls $music_directory/"$1"/"$2" | tr " " "╬")
   for song in $songs; do
-    nameSong=$(echo $song | tr "=" " ")
+    nameSong=$(echo $song | tr "╬" " ")
     renameSong "$1" "$2" "$nameSong"
     if [ $exitRename = 1 ]; then
       break
@@ -94,7 +102,7 @@ function renameSong() {
   artPadding=$((78 / 2 + $artistAlbumLen / 2))
   clear
   echo "┌───────────────────────────────────────────────────────────────────────────────┐"
-  echo "│                                 MUSIC  EDITOR                                 │"
+  echo "│                              BASIC MUSIC MANAGER                              │"
   echo "├───────────────────────────────────────────────────────────────────────────────┤"
   echo "│                                  RENAME SONG                                  │"
   echo "├───────────────────────────────────────────────────────────────────────────────┤"
@@ -125,17 +133,17 @@ function renameSong() {
 
 function statistic() {
 	rm $statisticsFile
-	artists=$(ls $music_directory | tr " " "=")
+	artists=$(ls $music_directory | tr " " "╬")
 	for artist in $artists; do
-		nameArtist=$(echo $artist | tr "=" " ")
+		nameArtist=$(echo $artist | tr "╬" " ")
 		allTimes=$(exiftool -duration $music_directory/"$nameArtist"/* | grep -e ':.* ' | sed -E 's/(^[^:]*:)//' | awk '{print $1}')
 		artistDuration=$(calcTime $allTimes)
 		artistSongs=$(ls "$music_directory"/"$nameArtist" -R | grep .mp3 | wc -l)
 		artistAlbums=$(ls "$music_directory"/"$nameArtist" -p | grep '/' | wc -l)
 		echo -e "$nameArtist\tAlbums: $artistAlbums\tSongs: $artistSongs\tDuration: $artistDuration" >>$statisticsFile
-		albums=$(ls $music_directory/"$nameArtist" | tr " " "=")
+		albums=$(ls $music_directory/"$nameArtist" | tr " " "╬")
 		for album in $albums; do
-			nameAlbum=$(echo $album | tr "=" " ")
+			nameAlbum=$(echo $album | tr "╬" " ")
 			times=$(exiftool -duration $music_directory/"$nameArtist"/"$nameAlbum"/* | grep -e ':.* ' | sed -E 's/(^[^:]*:)//' | awk '{print $1}')
 			albumDuration=$(calcTime $times)
 			albumSongs=$(ls "$music_directory"/"$nameArtist"/"$nameAlbum" -R | grep .mp3 | wc -l)
@@ -263,8 +271,8 @@ function changeArtist() {
 function changeArtistTag() {
 	# $1 = artist
 	eyeD3 -a "$1" *.mp3 >/dev/null 2>/dev/null # Change artist tag
-	for albums in $(ls | tr " " "=" | grep -v '\..*$'); do
-		album=$(echo $albums | tr "=" " ")
+	for albums in $(ls | tr " " "╬" | grep -v '\..*$'); do
+		album=$(echo $albums | tr "╬" " ")
 		eyeD3 -a "$1" "$album"/*.mp3 >/dev/null 2>/dev/null
 		eyeD3 -b "$1" "$album"/*.mp3 >/dev/null 2>/dev/null
 		eyeD3 --composer "$1" "$album"/*.mp3 >/dev/null 2>/dev/null
@@ -364,7 +372,7 @@ function send() {
 		fi
 	fi
 	shareMusic $Ip
-	deviceName=$($HOME/.local/share/gnome-shell/extensions/gsconnect@andyholmes.github.io/service/daemon.js -a | grep $Ip | tr " " "=" | awk '{print $2}' | tr "=" " ")
+	deviceName=$($HOME/.local/share/gnome-shell/extensions/gsconnect@andyholmes.github.io/service/daemon.js -a | grep $Ip | tr " " "╬" | awk '{print $2}' | tr "╬" " ")
 	notificationMobile "$deviceName"
 }
 
@@ -373,11 +381,11 @@ function shareMusic() {
 	cwd=$(pwd)
 	cd $music_directory
 	touch ."$1".list # Write Artist/Album/Song\n
-	for artists in $(ls | tr " " "=" | grep -v '\..*$'); do
-		artist=$(echo $artists | tr "=" " ")
-		for albums in $(ls "$artist" | tr " " "=" | grep -v '\..*$'); do
-			album=$(echo $albums | tr "=" " ")
-			songs=$(ls "$artist"/"$album" | tr " " "=")
+	for artists in $(ls | tr " " "╬" | grep -v '\..*$'); do
+		artist=$(echo $artists | tr "╬" " ")
+		for albums in $(ls "$artist" | tr " " "╬" | grep -v '\..*$'); do
+			album=$(echo $albums | tr "╬" " ")
+			songs=$(ls "$artist"/"$album" | tr " " "╬")
 			toSend $1 "$artist" "$album" $songs
 		done
 	done
@@ -393,7 +401,7 @@ function toSend() {
 	album="$1"
 	shift
 	for songName in $@; do
-		song=$(echo $songName | tr "=" " ")
+		song=$(echo $songName | tr "╬" " ")
 		if (grep -e "$artist"/"$album"/"$song" $DeviceFile >/dev/null); then continue; fi
 		$HOME/.local/share/gnome-shell/extensions/gsconnect@andyholmes.github.io/service/daemon.js -d $Ip --share-file="$music_directory/$artist/$album/$song"
 		echo "$artist/$album/$song" >>$DeviceFile
@@ -401,15 +409,21 @@ function toSend() {
 }
 
 notificationAdded() {
-	notify-send "Basic Music Manager" "The song <b>$1</b> has been added succesfully" --icon=$icon
+  if [[ $sendNotification = "Y" ]]; then
+	  notify-send "Basic Music Manager" "The song <b>$1</b> has been added succesfully" --icon=$icon
+  fi
 }
 
 notificationFinish() {
-	notify-send "Basic Music Manager" "The music has been updated" --icon=$icon
+  if [[ $sendNotification = "Y" ]]; then
+	  notify-send "Basic Music Manager" "The music has been updated" --icon=$icon
+  fi
 }
 
 notificationMobile() {
-	notify-send "Basic Music Manager" "The device <b>$1</b> music has been updated" --icon=$icon
+  if [[ $sendNotification = "Y" ]]; then
+	  notify-send "Basic Music Manager" "The device <b>$1</b> music has been updated" --icon=$icon
+  fi
 }
 
 help() {
@@ -527,7 +541,7 @@ selectOption() {
 function printMainMenu() {
   clear
   echo "┌───────────────────────────────────────────────────────────────────────────────┐"
-  echo "│                                 MUSIC  EDITOR                                 │"
+  echo "│                              BASIC MUSIC MANAGER                              │"
   echo "├───────────────────────────────────────────────────────────────────────────────┤"
   echo "│                Select using the arrow keys, then press enter.                 │"
   echo "│                                                                               │"
@@ -637,7 +651,7 @@ function creditsMenu() {
 function printCredits() {
   clear
   echo "┌───────────────────────────────────────────────────────────────────────────────┐"
-  echo "│                                 MUSIC  EDITOR                                 │"
+  echo "│                              BASIC MUSIC MANAGER                              │"
   echo "├───────────────────────────────────────────────────────────────────────────────┤"
   echo "│                                    CREDITS                                    │"
   echo "├───────────────────────────────────────────────────────────────────────────────┤"
@@ -684,16 +698,16 @@ function browseArtistMenu() {
                 printArtistMenu $browseArtistMenuNum "BROWSE MENU"
               ;;
               "C")
-                if [ $browseArtistMenuNum -le $(($maxBrowseArtistMenuNum - 7)) ]; then
-                  browseArtistMenuNum=$(($browseArtistMenuNum + 7))
+                if [ $browseArtistMenuNum -le $(($maxBrowseArtistMenuNum - $menuPageSize)) ]; then
+                  browseArtistMenuNum=$(($browseArtistMenuNum + $menuPageSize))
                 else
                   browseArtistMenuNum=$maxBrowseArtistMenuNum
                 fi
                 printArtistMenu $browseArtistMenuNum "BROWSE MENU"
               ;;
               "D")
-                if [ $browseArtistMenuNum -ge $((1 + 7)) ]; then
-                  browseArtistMenuNum=$(($browseArtistMenuNum - 7))
+                if [ $browseArtistMenuNum -ge $((1 + $menuPageSize)) ]; then
+                  browseArtistMenuNum=$(($browseArtistMenuNum - $menuPageSize))
                 else
                   browseArtistMenuNum=1
                 fi
@@ -763,16 +777,16 @@ function browseAlbumMenu() {
                 printAlbumMenu $browseAlbumMenuNum "BROWSE MENU" "$1"
               ;;
               "C")
-                if [ $browseAlbumMenuNum -le $(($maxBrowseAlbumMenuNum - 7)) ]; then
-                  browseAlbumMenuNum=$(($browseAlbumMenuNum + 7))
+                if [ $browseAlbumMenuNum -le $(($maxBrowseAlbumMenuNum - $menuPageSize)) ]; then
+                  browseAlbumMenuNum=$(($browseAlbumMenuNum + $menuPageSize))
                 else
                   browseAlbumMenuNum=$maxBrowseAlbumMenuNum
                 fi
                 printAlbumMenu $browseAlbumMenuNum "BROWSE MENU" "$1"
               ;;
               "D")
-                if [ $browseAlbumMenuNum -ge $((1 + 7)) ]; then
-                  browseAlbumMenuNum=$(($browseAlbumMenuNum - 7))
+                if [ $browseAlbumMenuNum -ge $((1 + $menuPageSize)) ]; then
+                  browseAlbumMenuNum=$(($browseAlbumMenuNum - $menuPageSize))
                 else
                   browseAlbumMenuNum=1
                 fi
@@ -845,16 +859,16 @@ function browseSongMenu() {
                 printSongMenu $browseSongMenuNum "BROWSE MENU" "$1" "$2"
               ;;
               "C")
-                if [ $browseSongMenuNum -le $(($maxBrowseSongMenuNum - 7)) ]; then
-                  browseSongMenuNum=$(($browseSongMenuNum + 7))
+                if [ $browseSongMenuNum -le $(($maxBrowseSongMenuNum - $menuPageSize)) ]; then
+                  browseSongMenuNum=$(($browseSongMenuNum + $menuPageSize))
                 else
                   browseSongMenuNum=$maxBrowseSongMenuNum
                 fi
                 printSongMenu $browseSongMenuNum "BROWSE MENU" "$1" "$2"
               ;;
               "D")
-                if [ $browseSongMenuNum -ge $((1 + 7)) ]; then
-                  browseSongMenuNum=$(($browseSongMenuNum - 7))
+                if [ $browseSongMenuNum -ge $((1 + $menuPageSize)) ]; then
+                  browseSongMenuNum=$(($browseSongMenuNum - $menuPageSize))
                 else
                   browseSongMenuNum=1
                 fi
@@ -928,16 +942,16 @@ function renameArtistMenu() {
                 printArtistMenu $renameArtistMenuNum "RENAME MENU"
               ;;
               "C")
-                if [ $renameArtistMenuNum -le $(($maxrenameArtistMenuNum - 7)) ]; then
-                  renameArtistMenuNum=$(($renameArtistMenuNum + 7))
+                if [ $renameArtistMenuNum -le $(($maxrenameArtistMenuNum - $menuPageSize)) ]; then
+                  renameArtistMenuNum=$(($renameArtistMenuNum + $menuPageSize))
                 else
                   renameArtistMenuNum=$maxrenameArtistMenuNum
                 fi
                 printArtistMenu $renameArtistMenuNum "RENAME MENU"
               ;;
               "D")
-                if [ $renameArtistMenuNum -ge $((1 + 7)) ]; then
-                  renameArtistMenuNum=$(($renameArtistMenuNum - 7))
+                if [ $renameArtistMenuNum -ge $((1 + $menuPageSize)) ]; then
+                  renameArtistMenuNum=$(($renameArtistMenuNum - $menuPageSize))
                 else
                   renameArtistMenuNum=1
                 fi
@@ -1001,16 +1015,16 @@ function renameAlbumMenu() {
                 printAlbumMenu $renameAlbumMenuNum "RENAME MENU" "$1"
               ;;
               "C")
-                if [ $renameAlbumMenuNum -le $(($maxrenameAlbumMenuNum - 7)) ]; then
-                  renameAlbumMenuNum=$(($renameAlbumMenuNum + 7))
+                if [ $renameAlbumMenuNum -le $(($maxrenameAlbumMenuNum - $menuPageSize)) ]; then
+                  renameAlbumMenuNum=$(($renameAlbumMenuNum + $menuPageSize))
                 else
                   renameAlbumMenuNum=$maxrenameAlbumMenuNum
                 fi
                 printAlbumMenu $renameAlbumMenuNum "RENAME MENU" "$1"
               ;;
               "D")
-                if [ $renameAlbumMenuNum -ge $((1 + 7)) ]; then
-                  renameAlbumMenuNum=$(($renameAlbumMenuNum - 7))
+                if [ $renameAlbumMenuNum -ge $((1 + $menuPageSize)) ]; then
+                  renameAlbumMenuNum=$(($renameAlbumMenuNum - $menuPageSize))
                 else
                   renameAlbumMenuNum=1
                 fi
@@ -1082,16 +1096,16 @@ function renameSongMenu() {
                 printSongMenu $renameSongMenuNum "RENAME MENU" "$1" "$2"
               ;;
               "C")
-                if [ $renameSongMenuNum -le $(($maxrenameSongMenuNum - 7)) ]; then
-                  renameSongMenuNum=$(($renameSongMenuNum + 7))
+                if [ $renameSongMenuNum -le $(($maxrenameSongMenuNum - $menuPageSize)) ]; then
+                  renameSongMenuNum=$(($renameSongMenuNum + $menuPageSize))
                 else
                   renameSongMenuNum=$maxrenameSongMenuNum
                 fi
                 printSongMenu $renameSongMenuNum "RENAME MENU" "$1" "$2"
               ;;
               "D")
-                if [ $renameSongMenuNum -ge $((1 + 7)) ]; then
-                  renameSongMenuNum=$(($renameSongMenuNum - 7))
+                if [ $renameSongMenuNum -ge $((1 + $menuPageSize)) ]; then
+                  renameSongMenuNum=$(($renameSongMenuNum - $menuPageSize))
                 else
                   renameSongMenuNum=1
                 fi
@@ -1163,16 +1177,16 @@ function addCoverArtistMenu() {
                 printArtistMenu $addCoverArtistMenuNum "ADD COVER MENU"
               ;;
               "C")
-                if [ $addCoverArtistMenuNum -le $(($maxaddCoverArtistMenuNum - 7)) ]; then
-                  addCoverArtistMenuNum=$(($addCoverArtistMenuNum + 7))
+                if [ $addCoverArtistMenuNum -le $(($maxaddCoverArtistMenuNum - $menuPageSize)) ]; then
+                  addCoverArtistMenuNum=$(($addCoverArtistMenuNum + $menuPageSize))
                 else
                   addCoverArtistMenuNum=$maxaddCoverArtistMenuNum
                 fi
                 printArtistMenu $addCoverArtistMenuNum "ADD COVER MENU"
               ;;
               "D")
-                if [ $addCoverArtistMenuNum -ge $((1 + 7)) ]; then
-                  addCoverArtistMenuNum=$(($addCoverArtistMenuNum - 7))
+                if [ $addCoverArtistMenuNum -ge $((1 + $menuPageSize)) ]; then
+                  addCoverArtistMenuNum=$(($addCoverArtistMenuNum - $menuPageSize))
                 else
                   addCoverArtistMenuNum=1
                 fi
@@ -1236,16 +1250,16 @@ function addCoverAlbumMenu() {
                 printAlbumMenu $addCoverAlbumMenuNum "ADD COVER MENU" "$1"
               ;;
               "C")
-                if [ $addCoverAlbumMenuNum -le $(($maxaddCoverAlbumMenuNum - 7)) ]; then
-                  addCoverAlbumMenuNum=$(($addCoverAlbumMenuNum + 7))
+                if [ $addCoverAlbumMenuNum -le $(($maxaddCoverAlbumMenuNum - $menuPageSize)) ]; then
+                  addCoverAlbumMenuNum=$(($addCoverAlbumMenuNum + $menuPageSize))
                 else
                   addCoverAlbumMenuNum=$maxaddCoverAlbumMenuNum
                 fi
                 printAlbumMenu $addCoverAlbumMenuNum "ADD COVER MENU" "$1"
               ;;
               "D")
-                if [ $addCoverAlbumMenuNum -ge $((1 + 7)) ]; then
-                  addCoverAlbumMenuNum=$(($addCoverAlbumMenuNum - 7))
+                if [ $addCoverAlbumMenuNum -ge $((1 + $menuPageSize)) ]; then
+                  addCoverAlbumMenuNum=$(($addCoverAlbumMenuNum - $menuPageSize))
                 else
                   addCoverAlbumMenuNum=1
                 fi
@@ -1271,15 +1285,24 @@ selectOptionAddCoverAlbum() {
       addCoverArtistMenu
     ;;
     *)
-      album=$(ls $music_directory/"$2" | sed -n "$(($1 - 1))p")
-      echo -n "Absolute path to cover file: "
+      album=$(ls "$music_directory/$2" | sed -n "$(($1 - 1))p")
+      echo -n "Absolute path to cover file $album: "
       read path
-      path=$(echo $path | tr -d "'" )
-      if ( cp "$path" "$music_directory/$2/$album/.cover" 1>/dev/null 2>/dev/null ); then
-        eyeD3 --add-image "$music_directory/$2/$album/.cover":FRONT_COVER "$music_directory/$2/$album/"*.mp3 1>/dev/null 2>/dev/null
-        addCoverAlbumMenu "$2"
+      path=$(echo $path | sed -e "s/'''/╬/g" | sed -e "s/'//g" | sed -e "s/╬/'/g" )
+      if [[ "$music_directory/$2/$album/.cover" = "$path" ]]; then return; addCoverAlbumMenu "$2"; fi
+      if ( cp "$path" "$music_directory/$2/$album/.cover" >/dev/null 2>/dev/null); then
+        eyeD3 --add-image "$music_directory/$2/$album/.cover":FRONT_COVER "$music_directory/$2/$album/"*.mp3 >/dev/null 2>/dev/null
+        # Change spaces for %20
+        coverLocation=$(echo "file://$music_directory/$2/$album/.cover" | sed -e 's/ /%20/g' )
+        gio set "$music_directory/$2/$album" metadata::custom-icon "$coverLocation" 2>/dev/null
+        songs=$(ls "$music_directory/$2/$album/"*.mp3 2>/dev/null | tr " " "╬")
+        for song in $songs; do
+          nameSong=$(echo $song | tr "╬" " ")
+          gio set "$nameSong" metadata::custom-icon "$coverLocation" 2>/dev/null
+        done
+        printAlbumMenu $1 "ADD COVER MENU" "$2"
       else
-        echo Error: File not found
+        echo Error: File $path not found
       fi
     ;;
   esac
@@ -1298,16 +1321,16 @@ function printArtistMenu() {
     fixedMenu=2
     menuNumber=2
   fi
-  pages=$((($artists + $menuNumber) /7))
-  if [ $((($artists + $menuNumber) % 7)) -gt 0 ]; then
+  pages=$((($artists + $menuNumber) /$menuPageSize))
+  if [ $((($artists + $menuNumber) % $menuPageSize)) -gt 0 ]; then
     let pages++
   fi
-  currPage=$((($1-1)/7 +1))
+  currPage=$((($1-1)/$menuPageSize +1))
   typeLen=$(echo "$2" | wc -m)
   typePadding=$((78 / 2 +  $typeLen / 2))
   clear
   echo "┌───────────────────────────────────────────────────────────────────────────────┐"
-  echo "│                                 MUSIC  EDITOR                                 │"
+  echo "│                              BASIC MUSIC MANAGER                              │"
   echo "├───────────────────────────────────────────────────────────────────────────────┤"
   printf "│%*s%*s│\n" "$typePadding" "$2" $((78-$typePadding+1)) " "
   echo "├───────────────────────────────────────────────────────────────────────────────┤"
@@ -1328,14 +1351,14 @@ function printArtistMenu() {
     fi
     readFromLine=1
   else
-    menuNumber=$((($currPage -1) * 7))
-    readFromLine=$((($currPage -1) * 7 - $fixedMenu + 1))
+    menuNumber=$((($currPage -1) * $menuPageSize))
+    readFromLine=$((($currPage -1) * $menuPageSize - $fixedMenu + 1))
   fi
 
-  artists=$(ls $music_directory | sed -n "$readFromLine,$(($currPage*7 -$fixedMenu))p" | tr " " "=")
+  artists=$(ls $music_directory | sed -n "$readFromLine,$(($currPage*$menuPageSize -$fixedMenu))p" | tr " " "╬")
 	for artist in $artists; do
 	  let menuNumber++
-		nameArtist=$(echo $artist | tr "=" " ")
+		nameArtist=$(echo $artist | tr "╬" " ")
     if [[ "$1" == "$menuNumber" ]]; then
       printf "│   \033[101m¬ %-70s\033[0m    │\n" "$nameArtist"
     else
@@ -1358,18 +1381,18 @@ function printAlbumMenu() {
   fi
   # Calculate selected page
   albums=$(ls $music_directory/"$3" | wc -l)
-  pages=$((($albums+2) /7))
-  if [ $((($albums + 2) % 7)) -gt 0 ]; then
+  pages=$((($albums+ $fixedMenu) /$menuPageSize))
+  if [ $((($albums + $fixedMenu) % $menuPageSize)) -gt 0 ]; then
     let pages++
   fi
-  currPage=$((($1-1)/7 +1))
+  currPage=$((($1-1)/$menuPageSize +1))
   artistLen=$(echo "$3" | wc -m)
   typeLen=$(echo "$2" | wc -m)
   artPadding=$((78 / 2 + $artistLen / 2))
   typePadding=$((78 / 2 +  $typeLen / 2))
   clear
   echo "┌───────────────────────────────────────────────────────────────────────────────┐"
-  echo "│                                 MUSIC  EDITOR                                 │"
+  echo "│                              BASIC MUSIC MANAGER                              │"
   echo "├───────────────────────────────────────────────────────────────────────────────┤"
   printf "│%*s%*s│\n" "$typePadding" "$2" $((78-$typePadding+1)) " "
   echo "├───────────────────────────────────────────────────────────────────────────────┤"
@@ -1401,17 +1424,17 @@ function printAlbumMenu() {
     fi
     readFromLine=1
   else
-    menuNumber=$((($currPage-1)*7))
-    readFromLine=$(($menuNumber -1))
+    menuNumber=$((($currPage-1)*$menuPageSize))
+    readFromLine=$(($menuNumber -($fixedMenu -1)))
   fi
 
-  albums=$(ls $music_directory/"$3" | sed -n "$(($readFromLine)),$(($currPage*7 +1))p" | tr " " "=")
+  albums=$(ls $music_directory/"$3" | sed -n "$(($readFromLine)),$(($currPage*$menuPageSize +1))p" | tr " " "╬")
 	for album in $albums; do
 	  let menuNumber++
-    if [ $menuNumber -gt $((7*$currPage)) ]; then
+    if [ $menuNumber -gt $(($menuPageSize*$currPage)) ]; then
       break
     fi
-		nameAlbum=$(echo $album | tr "=" " ")
+		nameAlbum=$(echo $album | tr "╬" " ")
     if [[ "$1" == "$menuNumber" ]]; then
       printf "│   \033[101m¬ %-70s\033[0m    │\n" "$nameAlbum"
     else
@@ -1430,18 +1453,18 @@ function printSongMenu() {
   # $4 = album name
   # Calculate selected page
   songs=$(ls $music_directory/"$3"/"$4" | wc -l)
-  pages=$((($songs+2) /7))
-  if [ $((($songs + 2) % 7)) -gt 0 ]; then
+  pages=$((($songs+2) /$menuPageSize))
+  if [ $((($songs + 2) % $menuPageSize)) -gt 0 ]; then
     let pages++
   fi
-  currPage=$((($1-1)/7 +1))
+  currPage=$((($1-1)/$menuPageSize +1))
   artistAlbumLen=$(echo "$3: $4" | wc -m)
   typeLen=$(echo "$2" | wc -m)
   artPadding=$((78 / 2 + $artistAlbumLen / 2))
   typePadding=$((78 / 2 +  $typeLen / 2))
   clear
   echo "┌───────────────────────────────────────────────────────────────────────────────┐"
-  echo "│                                 MUSIC  EDITOR                                 │"
+  echo "│                              BASIC MUSIC MANAGER                              │"
   echo "├───────────────────────────────────────────────────────────────────────────────┤"
   printf "│%*s%*s│\n" "$typePadding" "$2" $((78-$typePadding+1)) " "
   echo "├───────────────────────────────────────────────────────────────────────────────┤"
@@ -1472,17 +1495,17 @@ function printSongMenu() {
     menuNumber=2
     readFromLine=1
   else
-    menuNumber=$((($currPage-1)*7))
+    menuNumber=$((($currPage-1)*$menuPageSize))
     readFromLine=$(($menuNumber -1))
   fi
 
-  songs=$(ls $music_directory/"$3"/"$4"  | sed -n "$(($readFromLine)),$(($currPage*7 +1))p" | tr " " "=")
+  songs=$(ls $music_directory/"$3"/"$4"  | sed -n "$(($readFromLine)),$(($currPage*$menuPageSize +1))p" | tr " " "╬")
 	for song in $songs; do
 	  let menuNumber++
-    if [ $menuNumber -gt $((7*$currPage)) ]; then
+    if [ $menuNumber -gt $(($menuPageSize*$currPage)) ]; then
       break
     fi
-		nameSong=$(echo $song | tr "=" " ")
+		nameSong=$(echo $song | tr "╬" " ")
     if [[ "$1" == "$menuNumber" ]]; then
       #BUG: │   ¬ 08 - Breathe No More (Live From Le Zénith,France_2004).mp3               │ 1 space from correct position
       printf "│   \033[101m¬ %-74s\033[0m│\n" "$nameSong"
