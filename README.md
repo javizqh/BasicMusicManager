@@ -2,7 +2,7 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=shields)](http://makeapullrequest.com)
 
 
-A Bash script that allows you to easily managed the most common tags for your music, while organizing them in a easy to use directory structure.
+A Bash script that allows you to easily managed the most common tags for your music, while organizing them in a easy to use directory structure. Only works for .mp3 files.
 
 ![Logo](logo_round.svg)
 
