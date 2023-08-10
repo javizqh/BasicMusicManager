@@ -1286,7 +1286,7 @@ selectOptionAddCoverAlbum() {
     ;;
     *)
       album=$(ls "$music_directory/$2" | sed -n "$(($1 - 1))p")
-      echo -n "Absolute path to cover file $album: "
+      echo -n "Absolute path to cover file: "
       read path
       path=$(echo $path | sed -e "s/'''/╬/g" | sed -e "s/'//g" | sed -e "s/╬/'/g" )
       if [[ "$music_directory/$2/$album/.cover" = "$path" ]]; then return; addCoverAlbumMenu "$2"; fi
