@@ -10,6 +10,8 @@ usage() {
 function update() {
 	#Check and change all the songs in order to match their corresponding artist and album
 	#they are in
+  #TODO: this is part of statistics csv incompatible with statistic
+  echo -e "ArtistName\tAlbumName\tSongName\tSongLength" > $statisticsFile
 	#TODO: optimize this. Now iterating 3 times per song. Don't now how this is faster than 1 iteration
 	artists=$(ls $music_directory | tr " " "╬")
 	for artist in $artists; do
@@ -39,10 +41,13 @@ function update() {
         if [[ -f "$music_directory/$nameArtist/$nameAlbum/.cover" ]]; then
           gio set "$music_directory/$nameArtist/$nameAlbum/$nameSong.mp3" metadata::custom-icon "$coverLocation" 2>/dev/null
         fi
+        #TODO: this is part of statistics tsv incompatible with statistic
+        echo -e "$nameArtist\t$nameAlbum\t$nameSong\t $(exiftool -duration "$music_directory"/"$nameArtist"/"$nameAlbum"/"$nameSong".mp3 | grep -e ':.* ' | sed -E 's/(^[^:]*:)//' | awk '{print $1}')" >>$statisticsFile
 			done
 		done
 	done
-	statistic
+  #TODO: this is part of statistic incompatible with statistics csv
+	#statistic
 	notificationFinish
 }
 
@@ -141,6 +146,22 @@ function statistic() {
 		artistSongs=$(ls "$music_directory"/"$nameArtist" -R | grep .mp3 | wc -l)
 		artistAlbums=$(ls "$music_directory"/"$nameArtist" -p | grep '/' | wc -l)
 		echo -e "$nameArtist\tAlbums: $artistAlbums\tSongs: $artistSongs\tDuration: $artistDuration" >>$statisticsFile
+		albums=$(ls $music_directory/"$nameArtist" | tr " " "╬")
+		for album in $albums; do
+			nameAlbum=$(echo $album | tr "╬" " ")
+			times=$(exiftool -duration $music_directory/"$nameArtist"/"$nameAlbum"/* | grep -e ':.* ' | sed -E 's/(^[^:]*:)//' | awk '{print $1}')
+			albumDuration=$(calcTime $times)
+			albumSongs=$(ls "$music_directory"/"$nameArtist"/"$nameAlbum" -R | grep .mp3 | wc -l)
+			echo -e "\t$nameAlbum\t$albumSongs songs\t$albumDuration" >>$statisticsFile
+		done
+	done
+}
+
+function csvStatistic() {
+	rm $statisticsFile
+	artists=$(ls $music_directory | tr " " "╬")
+	for artist in $artists; do
+		nameArtist=$(echo $artist | tr "╬" " ")
 		albums=$(ls $music_directory/"$nameArtist" | tr " " "╬")
 		for album in $albums; do
 			nameAlbum=$(echo $album | tr "╬" " ")
@@ -271,7 +292,7 @@ function changeArtist() {
 function changeArtistTag() {
 	# $1 = artist
 	eyeD3 -a "$1" *.mp3 >/dev/null 2>/dev/null # Change artist tag
-	for albums in $(ls | tr " " "╬" | grep -v '\..*$'); do
+	for albums in $(ls | tr " " "╬" | grep -v '\..*$' 2>/dev/null); do
 		album=$(echo $albums | tr "╬" " ")
 		eyeD3 -a "$1" "$album"/*.mp3 >/dev/null 2>/dev/null
 		eyeD3 -b "$1" "$album"/*.mp3 >/dev/null 2>/dev/null
@@ -659,8 +680,8 @@ function printCredits() {
   echo "│                                                                               │"
   echo "│   ¬ Main creator: Javier Izquierdo <javizqh@gmail.com>                        │"
   echo "│   ¬ Main creator github: https://github.com/javizqh                           │"
-  echo "│   ¬ eyeD3 from Nicfit https://github.com/nicfit/eyeD3                         │"
-  echo "│   ¬ yt-dlp from yt-dlp https://github.com/yt-dlp/yt-dlp                       │"
+  echo "│   ¬ Uses eyeD3 from Nicfit https://github.com/nicfit/eyeD3                    │"
+  echo "│   ¬ Uses yt-dlp from yt-dlp https://github.com/yt-dlp/yt-dlp                  │"
   echo "│                                                                               │"
   echo "└───────────────────────────────────────────────────────────────────────────────┘"
   # Add credits and more stuff

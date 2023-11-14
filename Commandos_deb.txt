@@ -1,0 +1,2 @@
+dpkg-deb --root-owner-group --build bmm
+lintian bmm.deb

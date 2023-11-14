@@ -1,11 +1,11 @@
 Package: bmm
-Version: 1.0-1
+Version: 1.0-8
 Section: utils
 Priority: optional
 Architecture: all
 Installed-Size: 8048
 Maintainer: Javier Izquierdo <javizqh@gmail.com>
 Homepage: https://github.com/javizqh/BasicMusicManager
-Depends: eyed3, yt-dlp
+Depends: eyed3, yt-dlp, exiftool
 Description: Basic music manager 
  Do basic maintenance in your music easily
